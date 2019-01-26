@@ -10,6 +10,17 @@ import numpy as np
 from collections import Counter
 from sklearn import svm, cross_validation, neighbors
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
+import sys
+import warnings
+
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+
+with open("sp500tickers.pickle", "rb") as f:
+    tickers = pickle.load(f)
+
+main_df = pd.DataFrame()
+
 
 def save_sp500_tickers():
     resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
@@ -151,7 +162,7 @@ def extract_featuresets(ticker):
     y = df['{}_target'.format(ticker)].values
     return X, y, df
 
-
+accuracyList = []
 def do_ml(ticker):
     X, y, df = extract_featuresets(ticker)
 
@@ -170,6 +181,11 @@ def do_ml(ticker):
     print()
     return confidence
 
-do_ml('XOM')
-do_ml('AAPL')
-do_ml('ABT')
+for count, ticker in enumerate(tickers[:5]):
+    df = do_ml('{}'.format(ticker)) 
+    accuracyList.append(df)
+    
+
+mean1 = np.mean(accuracyList)
+print('Overall mean accuracy')
+print(mean1)
